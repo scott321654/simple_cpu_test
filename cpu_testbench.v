@@ -14,12 +14,11 @@ module cpu_testbench;
     // --- Instantiate the Unit Under Test (UUT) ---
     // 例化你的 simple_cpu 模組
     simple_cpu uut (
-        .clk_50mhz          (clk_50mhz),
-        .key0_n             (key0_n),
-        .debug_output_acc   (debug_output_acc),
-        // 如果你在 simple_cpu.v 添加了更多偵錯埠，這裡也要連接
-        // .debug_pc_out       (debug_pc_out),
-        // .debug_instruction_out (debug_instruction_out)
+        .clk_50mhz              (clk_50mhz),
+        .key0_n                 (key0_n),
+        .debug_output_acc       (debug_output_acc),
+        .debug_pc_out           (debug_pc_out),
+        .debug_instruction_out  (debug_instruction_out)
     );
 
     // --- Clock Generation ---
@@ -37,21 +36,20 @@ module cpu_testbench;
     initial begin
         // 初始重置 (低電位有效)
         key0_n = 1'b0;   // Assert reset
-        #100;            // 保持重置 100ns
+        #100;            // 保持重置 100ns (足以讓所有寄存器復位)
         key0_n = 1'b1;   // Deassert reset (CPU 開始運行)
 
         // --- 模擬結束條件 ---
         // 運行一段時間後結束模擬，或者在特定事件發生時結束
-        // 這裡設定運行 1000ns 後結束
-        #1000;
+        // 這裡設定運行 2000ns 後結束 (足以執行一些指令)
+        #2000;
         $finish; // 結束模擬
 
-        // 也可以使用 $display 打印信息到 ModelSim 控制台
-        // initial begin
-        //     $display("Simulation started!");
-        //     $monitor("Time=%0t | PC=%h | Instr=%h | ACC=%h",
-        //              $time, uut.pc_out, uut.instruction_from_ram, uut.acc_out);
-        // end
+        // --- 偵錯信息輸出到 ModelSim 控制台 (Transcript Window) ---
+        // $monitor 會在任何參數值改變時自動打印
+        // 確保你的 program.mif 有有效的指令，否則這裡會一直打印 0x0000
+        $monitor("Time=%0t ns | PC=%h | Instr=%h | ACC=%h | Opcode=%h",
+                 $time, uut.pc_out, uut.instruction_from_ram, uut.acc_out, uut.decoded_opcode);
     end
 
 endmodule

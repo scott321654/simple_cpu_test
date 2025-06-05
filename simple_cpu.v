@@ -71,26 +71,26 @@ module simple_cpu (
     );
 
     // 2. RAM (Instruction & Data Memory) - 使用 IP Catalog 生成的模組
-    // 根據 ram_inst.txt (ram_inst.v) 提供的埠名稱與 simple_cpu 訊號對應 [cite: 88]
-    ram u_ram ( // 模組名稱是 ram，實例名稱為 u_ram [cite: 88]
-        .address ( ram_addr ),               // IP Port: .address  <-- 連接 simple_cpu 的 ram_addr [cite: 88]
-        .clock   ( clk_50mhz ),              // IP Port: .clock    <-- 連接 simple_cpu 的 clk_50mhz [cite: 88]
-        .data    ( ram_data_in ),            // IP Port: .data     <-- 連接 simple_cpu 的 ram_data_in [cite: 88]
-        .wren    ( ram_we ),                 // IP Port: .wren     <-- 連接 simple_cpu 的 ram_we [cite: 88]
-        .q       ( instruction_from_ram )    // IP Port: .q        <-- 連接 simple_cpu 的 instruction_from_ram [cite: 88]
+    // 根據 ram_inst.txt (ram_inst.v) 提供的埠名稱與 simple_cpu 訊號對應
+    ram u_ram ( // 模組名稱是 ram，實例名稱為 u_ram
+        .address ( ram_addr ),               // IP Port: .address  <-- 連接 simple_cpu 的 ram_addr
+        .clock   ( clk_50mhz ),              // IP Port: .clock    <-- 連接 simple_cpu 的 clk_50mhz
+        .data    ( ram_data_in ),            // IP Port: .data     <-- 連接 simple_cpu 的 ram_data_in
+        .wren    ( ram_we ),                 // IP Port: .wren     <-- 連接 simple_cpu 的 ram_we
+        .q       ( instruction_from_ram )    // IP Port: .q        <-- 連接 simple_cpu 的 instruction_from_ram
     );
 
     // Mux for RAM Address: Selects between PC (for instruction fetch) and Operand (for data access)
-    assign ram_addr = (ram_addr_mux_sel == 1'b1) ? decoded_immediate_operand : pc_out; [cite: 113, 114]
+    assign ram_addr = (ram_addr_mux_sel == 1'b1) ? decoded_immediate_operand : pc_out;
 
     // Data to write to RAM for STORE instruction: Comes from Accumulator
-    assign ram_data_in = {8'h00, acc_out}; [cite: 115]
+    assign ram_data_in = {8'h00, acc_out};
 
     // 3. Instruction Register (IR) / Decoder
     ir_decoder u_ir_decoder (
         .clk(clk_50mhz),
         .reset_n(key0_n),
-        .instruction_in(instruction_from_ram), [cite: 116]
+        .instruction_in(instruction_from_ram),
 
         .pc_load_en(pc_load_en),
         .jump_addr(jump_addr),
@@ -116,13 +116,13 @@ module simple_cpu (
         .acc_load_en(acc_load_en),
         .data_in(acc_data_in_muxed),
         .acc_out(acc_out)
-    ); [cite: 117]
+    );
 
     // Mux for Accumulator Data Input: Selects source for ACC loading
     assign acc_data_in_muxed =
-        (decoded_opcode == OP_LOAD_ACC_IMM)  ? decoded_immediate_operand : // FIXED: Use top-level parameter [cite: 118, 119]
-        (decoded_opcode == OP_LOAD_ACC_MEM)  ? instruction_from_ram[7:0] : // FIXED: Use top-level parameter [cite: 120]
-        alu_result; // Default for ALU operations [cite: 121]
+        (decoded_opcode == OP_LOAD_ACC_IMM)  ? decoded_immediate_operand :
+        (decoded_opcode == OP_LOAD_ACC_MEM)  ? instruction_from_ram[7:0] :
+        alu_result;
 
     // 5. ALU
     alu u_alu (
@@ -131,13 +131,13 @@ module simple_cpu (
         .opcode(alu_opcode),
         .result(alu_result),
         .carry_out(alu_carry_out)
-    ); [cite: 121]
+    );
 
     // Mux for ALU Operand A: In this simple CPU, ALU A is always from Accumulator
-    assign alu_a_input = acc_out; [cite: 122]
+    assign alu_a_input = acc_out;
 
     // Mux for ALU Operand B: Selects between Immediate_Operand and Lower 8 bits of RAM data
-    assign alu_b_input = (alu_b_mux_sel == 1'b0) ? decoded_immediate_operand : instruction_from_ram[7:0]; [cite: 123, 124]
+    assign alu_b_input = (alu_b_mux_sel == 1'b0) ? decoded_immediate_operand : instruction_from_ram[7:0];
 
     // --- 偵錯輸出連接 ---
     assign debug_output_acc = acc_out;
