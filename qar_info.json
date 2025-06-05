@@ -1,0 +1,7 @@
+{
+	"common_dir" : "D:/FPGA_project/final/simple_cpu_test/",
+	"acds_version" : "Version 18.0.0",
+	"platform" : "windows",
+	"os" : "Windows 10",
+	"qpf" : "simple_cpu_test.qpf"
+}
