@@ -1,81 +1,16 @@
-WIDTH = 16;
-DEPTH = 256;
+WIDTH=16;
+DEPTH=256;
 
-ADDRESS_RADIX = HEX;
-DATA_RADIX = HEX;
+ADDRESS_RADIX=HEX;
+DATA_RADIX=HEX;
 
 CONTENT BEGIN
-    -- --- Simple CPU Test Program ---
-
-    -- --- ALU Operations Test ---
-    -- 0x00: LOAD_ACC_IMM 0x0A (ACC = 0x0A)
-    00 : 100A;
-    -- 0x01: ADD_ACC_IMM 0x05 (ACC = 0x0A + 0x05 = 0x0F)
-    01 : 3005;
-    -- 0x02: SUB_ACC_IMM 0x03 (ACC = 0x0F - 0x03 = 0x0C)
-    02 : 4003;
-    -- 0x03: AND_ACC_IMM 0x0C (ACC = 0x0C & 0x0C = 0x0C)
-    03 : 500C;
-    -- 0x04: INC_ACC (ACC = 0x0C + 1 = 0x0D)
-    04 : 6000; -- Operand for INC is ignored
-    -- 0x05: OUT_ACC_SERIAL (Output 0x0D to UART, which is ASCII Carriage Return)
-    05 : 8000;
-
-    -- --- "Hello World!" String Output ---
-    -- Start at address 0x06
-    -- Each character is loaded to ACC, then OUT_ACC_SERIAL
-    -- 'H' (0x48)
-    06 : 1048;
-    07 : 8000;
-    -- 'e' (0x65)
-    08 : 1065;
-    09 : 8000;
-    -- 'l' (0x6C)
-    0A : 106C;
-    0B : 8000;
-    -- 'l' (0x6C)
-    0C : 106C;
-    0D : 8000;
-    -- 'o' (0x6F)
-    0E : 106F;
-    0F : 8000;
-    -- ' ' (0x20)
-    10 : 1020;
-    11 : 8000;
-    -- 'W' (0x57)
-    12 : 1057;
-    13 : 8000;
-    -- 'o' (0x6F)
-    14 : 106F;
-    15 : 8000;
-    -- 'r' (0x72)
-    16 : 1072;
-    17 : 8000;
-    -- 'l' (0x6C)
-    18 : 106C;
-    19 : 8000;
-    -- 'd' (0x64)
-    1A : 1064;
-    1B : 8000;
-    -- '!' (0x21)
-    1C : 1021;
-    1D : 8000;
-    -- '\n' (0x0A) - Newline character
-    1E : 100A;
-    1F : 8000;
-
-    -- --- Program Termination (Loop indefinitely) ---
-    -- 0x20: JUMP 0x20 (Loop back to itself, effectively halting execution)
-    20 : 7020;
-
-    -- --- Example Data for Memory Access (optional) ---
-    -- If you uncomment and use LOAD_ACC_MEM/STORE_ACC_MEM, this data will be available.
-    -- (e.g., LOAD_ACC_MEM 0xF0 will load 0xAA into ACC)
-    F0 : 00AA;
-    F1 : 00BB;
-    F2 : 00CC;
-
-    -- Fill unused memory locations with NO_OP (0x0000)
-    [21..EF] : 0000; -- Fill from address 0x21 to 0xEF with NO_OP
-    [F3..FF] : 0000; -- Fill from address 0xF3 to 0xFF with NO_OP
+    00 : 1005;
+    01 : 3180;
+    02 : 2081;
+    03 : 7000;
+    80 : 000A;
+    81 : 0000;
+    [04..7F] : 0000;
+    [82..FF] : 0000;
 END;

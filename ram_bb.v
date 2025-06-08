@@ -75,7 +75,7 @@ endmodule
 // Retrieval info: PRIVATE: JTAG_ENABLED NUMERIC "0"
 // Retrieval info: PRIVATE: JTAG_ID STRING "NONE"
 // Retrieval info: PRIVATE: MAXIMUM_DEPTH NUMERIC "0"
-// Retrieval info: PRIVATE: MIFfilename STRING "program.mif"
+// Retrieval info: PRIVATE: MIFfilename STRING "program.hex"
 // Retrieval info: PRIVATE: NUMWORDS_A NUMERIC "256"
 // Retrieval info: PRIVATE: RAM_BLOCK_TYPE NUMERIC "0"
 // Retrieval info: PRIVATE: READ_DURING_WRITE_MODE_PORT_A NUMERIC "3"
@@ -92,7 +92,7 @@ endmodule
 // Retrieval info: LIBRARY: altera_mf altera_mf.altera_mf_components.all
 // Retrieval info: CONSTANT: CLOCK_ENABLE_INPUT_A STRING "BYPASS"
 // Retrieval info: CONSTANT: CLOCK_ENABLE_OUTPUT_A STRING "BYPASS"
-// Retrieval info: CONSTANT: INIT_FILE STRING "program.mif"
+// Retrieval info: CONSTANT: INIT_FILE STRING "program.hex"
 // Retrieval info: CONSTANT: INTENDED_DEVICE_FAMILY STRING "Cyclone V"
 // Retrieval info: CONSTANT: LPM_HINT STRING "ENABLE_RUNTIME_MOD=NO"
 // Retrieval info: CONSTANT: LPM_TYPE STRING "altsyncram"
@@ -118,7 +118,7 @@ endmodule
 // Retrieval info: GEN_FILE: TYPE_NORMAL ram.v TRUE
 // Retrieval info: GEN_FILE: TYPE_NORMAL ram.inc FALSE
 // Retrieval info: GEN_FILE: TYPE_NORMAL ram.cmp FALSE
-// Retrieval info: GEN_FILE: TYPE_NORMAL ram.bsf FALSE
+// Retrieval info: GEN_FILE: TYPE_NORMAL ram.bsf TRUE
 // Retrieval info: GEN_FILE: TYPE_NORMAL ram_inst.v TRUE
 // Retrieval info: GEN_FILE: TYPE_NORMAL ram_bb.v TRUE
 // Retrieval info: LIB_FILE: altera_mf
