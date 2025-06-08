@@ -73,12 +73,13 @@ module simple_cpu (
     // 2. RAM (Instruction & Data Memory) - 使用 IP Catalog 生成的模組
     // 根據 ram_inst.txt (ram_inst.v) 提供的埠名稱與 simple_cpu 訊號對應
     ram u_ram ( // 模組名稱是 ram，實例名稱為 u_ram
-        .address ( ram_addr ),               // IP Port: .address  <-- 連接 simple_cpu 的 ram_addr
-        .clock   ( clk_50mhz ),              // IP Port: .clock    <-- 連接 simple_cpu 的 clk_50mhz
-        .data    ( ram_data_in ),            // IP Port: .data     <-- 連接 simple_cpu 的 ram_data_in
-        .wren    ( ram_we ),                 // IP Port: .wren     <-- 連接 simple_cpu 的 ram_we
-        .q       ( instruction_from_ram )    // IP Port: .q        <-- 連接 simple_cpu 的 instruction_from_ram
+        .addr(ram_addr),               // IP Port: .address  <-- 連接 simple_cpu 的 ram_addr
+        .clk(clk_50mhz),              // IP Port: .clock    <-- 連接 simple_cpu 的 clk_50mhz
+        .data_in(ram_data_in),            // IP Port: .data     <-- 連接 simple_cpu 的 ram_data_in
+        .we(ram_we),                 // IP Port: .wren     <-- 連接 simple_cpu 的 ram_we
+        .data_out(instruction_from_ram)    // IP Port: .q        <-- 連接 simple_cpu 的 instruction_from_ram
     );
+
 
     // Mux for RAM Address: Selects between PC (for instruction fetch) and Operand (for data access)
     assign ram_addr = (ram_addr_mux_sel == 1'b1) ? decoded_immediate_operand : pc_out;
