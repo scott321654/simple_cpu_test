@@ -3,8 +3,8 @@
 module cpu_testbench;
 
     // --- Testbench Signals (Connect to simple_cpu's ports) ---
-    reg clk_50mhz;      // 模擬時鐘
-    reg key0_n;         // 模擬重置按鈕
+    reg clk_50mhz;       // 模擬時鐘
+    reg key0_n;          // 模擬重置按鈕
 
     // 連接 simple_cpu 的偵錯輸出埠，以便在波形中觀察
     wire [7:0] debug_output_acc;
@@ -14,11 +14,11 @@ module cpu_testbench;
     // --- Instantiate the Unit Under Test (UUT) ---
     // 例化你的 simple_cpu 模組
     simple_cpu uut (
-        .clk_50mhz              (clk_50mhz),
-        .key0_n                 (key0_n),
-        .debug_output_acc       (debug_output_acc),
-        .debug_pc_out           (debug_pc_out),
-        .debug_instruction_out  (debug_instruction_out)
+        .clk_50mhz             (clk_50mhz),
+        .key0_n                (key0_n),
+        .debug_output_acc      (debug_output_acc),
+        .debug_pc_out          (debug_pc_out),
+        .debug_instruction_out (debug_instruction_out)
     );
 
     // --- Clock Generation ---
@@ -35,9 +35,9 @@ module cpu_testbench;
     // --- Reset Generation and Simulation Control ---
     initial begin
         // 初始重置 (低電位有效)
-        key0_n = 1'b0;   // Assert reset
-        #100;            // 保持重置 100ns (足以讓所有寄存器復位)
-        key0_n = 1'b1;   // Deassert reset (CPU 開始運行)
+        key0_n = 1'b0;    // Assert reset
+        #100;             // 保持重置 100ns (足以讓所有寄存器復位)
+        key0_n = 1'b1;    // Deassert reset (CPU 開始運行)
 
         // --- 模擬結束條件 ---
         // 運行一段時間後結束模擬，或者在特定事件發生時結束
@@ -46,10 +46,15 @@ module cpu_testbench;
         $finish; // 結束模擬
 
         // --- 偵錯信息輸出到 ModelSim 控制台 (Transcript Window) ---
-        // $monitor 會在任何參數值改變時自動打印
-        // 確保你的 program.mif 有有效的指令，否則這裡會一直打印 0x0000
-        $monitor("Time=%0t ns | PC=%h | Instr=%h | ACC=%h | Opcode=%h",
-                 $time, uut.pc_out, uut.instruction_from_ram, uut.acc_out, uut.decoded_opcode);
+        // 僅修改 $monitor 語句，以反映雙埠記憶體相關的新訊號名稱
+        // 確保你的 program.mif 有有效的指令
+    end
+
+    // --- 波形傾印 (用於 ModelSim/VCS 等工具) ---
+    // 推薦保留 $dumpvars，它可以幫助你看到所有內部訊號，這是最直接的偵錯方式
+    initial begin
+        $dumpfile("simple_cpu.vcd"); // 輸出 VCD 檔案
+        $dumpvars(0, cpu_testbench); // 傾印所有訊號
     end
 
 endmodule

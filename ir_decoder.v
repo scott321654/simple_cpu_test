@@ -1,17 +1,17 @@
 // ir_decoder.v - Instruction Register and Decoder module
 
 module ir_decoder (
-    input wire clk,             // Clock
-    input wire reset_n,         // Asynchronous active-low reset
-    input wire [15:0] instruction_in, // 16-bit instruction from RAM
+    input wire clk,            // Clock
+    input wire reset_n,        // Asynchronous active-low reset
+    input wire [15:0] instruction_in, // 16-bit instruction from RAM (Port A)
 
     // Control signals for PC
-    output reg pc_load_en,      // PC load enable
+    output reg pc_load_en,     // PC load enable
     output wire [7:0] jump_addr, // Jump address (from instruction's operand)
 
     // Control signals for RAM
-    output reg ram_we,          // RAM Write Enable
-    output reg ram_addr_mux_sel, // Mux select for RAM address (0: PC, 1: Operand)
+    output reg ram_we,         // RAM Write Enable (now for Data Port B)
+    // output reg ram_addr_mux_sel, // REMOVED: No longer needed for dual-port RAM
 
     // Control signals for ALU
     output reg [3:0] alu_opcode, // ALU operation code
@@ -35,25 +35,24 @@ module ir_decoder (
     reg [15:0] ir_reg;
 
     // Decoded Opcode and Operand (internal wires now connected to outputs)
-    // The previous 'wire decoded_opcode;' is now 'output wire [7:0] decoded_opcode_out;'
     assign decoded_opcode_out = ir_reg[15:8]; // High 8 bits are opcode
     assign immediate_operand = ir_reg[7:0]; // Low 8 bits are operand (immediate or address)
     assign jump_addr = ir_reg[7:0]; // Jump address is the operand
 
     // Define Instruction Opcodes (Crucial: Must match your program.mif and assembler logic)
-    parameter OP_NO_OP          = 8'h00; // No operation
-    parameter OP_LOAD_ACC_IMM   = 8'h10; // Load immediate into ACC
-    parameter OP_LOAD_ACC_MEM   = 8'h11; // Load from memory into ACC
-    parameter OP_STORE_ACC_MEM  = 8'h20; // Store ACC into memory
-    parameter OP_ADD_ACC_IMM    = 8'h30; // ADD immediate to ACC
-    parameter OP_ADD_ACC_MEM    = 8'h31; // ADD from memory to ACC
-    parameter OP_SUB_ACC_IMM    = 8'h40; // SUB immediate from ACC
-    parameter OP_SUB_ACC_MEM    = 8'h41; // SUB from memory from ACC
-    parameter OP_AND_ACC_IMM    = 8'h50; // AND immediate with ACC
-    parameter OP_AND_ACC_MEM    = 8'h51; // AND from memory with ACC
-    parameter OP_INC_ACC        = 8'h60; // Increment ACC
-    parameter OP_JUMP           = 8'h70; // Unconditional Jump
-    parameter OP_OUT_ACC_SERIAL = 8'h80; // Output ACC content via serial
+    parameter OP_NO_OP            = 8'h00; // No operation
+    parameter OP_LOAD_ACC_IMM     = 8'h10; // Load immediate into ACC
+    parameter OP_LOAD_ACC_MEM     = 8'h11; // Load from memory into ACC
+    parameter OP_STORE_ACC_MEM    = 8'h20; // Store ACC into memory
+    parameter OP_ADD_ACC_IMM      = 8'h30; // ADD immediate to ACC
+    parameter OP_ADD_ACC_MEM      = 8'h31; // ADD from memory to ACC
+    parameter OP_SUB_ACC_IMM      = 8'h40; // SUB immediate from ACC
+    parameter OP_SUB_ACC_MEM      = 8'h41; // SUB from memory from ACC
+    parameter OP_AND_ACC_IMM      = 8'h50; // AND immediate with ACC
+    parameter OP_AND_ACC_MEM      = 8'h51; // AND from memory with ACC
+    parameter OP_INC_ACC          = 8'h60; // Increment ACC
+    parameter OP_JUMP             = 8'h70; // Unconditional Jump
+    parameter OP_OUT_ACC_SERIAL   = 8'h80; // Output ACC content via serial
 
     // ALU OpCodes (must match the alu.v module's parameters)
     parameter ALU_OP_ADD = 4'b0000;
@@ -62,90 +61,79 @@ module ir_decoder (
     parameter ALU_OP_INC = 4'b0011;
 
     // Control signal defaults (combinational logic based on current IR)
-    // All signals default to inactive to prevent unintended operations
     always @(*) begin
         pc_load_en = 1'b0;
-        ram_we = 1'b0;
-        ram_addr_mux_sel = 1'b0; // Default: Select PC for RAM address (for instruction fetch)
-        alu_opcode = 4'b0000; // Default ALU to NO_OP (or a safe state)
-        alu_a_mux_sel = 1'b0; // Default: ACC to ALU A (fixed for this simple design)
-        alu_b_mux_sel = 1'b0; // Default: Immediate to ALU B
+        ram_we = 1'b0;                      // Default RAM write enable to 0 (for data port)
+        // ram_addr_mux_sel = 1'b0;         // REMOVED
+        alu_opcode = 4'b0000;
+        alu_a_mux_sel = 1'b0;
+        alu_b_mux_sel = 1'b0;
         acc_load_en = 1'b0;
         serial_out_en = 1'b0;
 
-        // Decode logic based on the opcode (now using decoded_opcode_out)
-        case (decoded_opcode_out) // Use the output port for decoding
+        case (decoded_opcode_out)
             OP_NO_OP: begin
-                // No operation, just PC increments (handled by PC module itself)
+                // No operation
             end
 
             OP_LOAD_ACC_IMM: begin
-                acc_load_en = 1'b1; // Load immediate value into ACC
-                // ALU is not involved directly.
+                acc_load_en = 1'b1;
             end
             OP_LOAD_ACC_MEM: begin
-                acc_load_en = 1'b1; // Load data from memory into ACC
-                ram_addr_mux_sel = 1'b1; // Select operand as RAM address for data read
-                // ALU is not involved.
+                acc_load_en = 1'b1;
+                // No need to set ram_addr_mux_sel, as data port uses operand address directly
             end
             OP_STORE_ACC_MEM: begin
-                ram_we = 1'b1; // Write ACC to memory
-                ram_addr_mux_sel = 1'b1; // Select operand as RAM address for data write
+                ram_we = 1'b1; // Enable write for data port
+                // No need to set ram_addr_mux_sel
             end
 
             OP_ADD_ACC_IMM: begin
                 acc_load_en = 1'b1;
                 alu_opcode = ALU_OP_ADD;
-                alu_a_mux_sel = 1'b0; // ACC to ALU A
                 alu_b_mux_sel = 1'b0; // Immediate to ALU B
             end
             OP_ADD_ACC_MEM: begin
                 acc_load_en = 1'b1;
                 alu_opcode = ALU_OP_ADD;
-                alu_a_mux_sel = 1'b0; // ACC to ALU A
-                alu_b_mux_sel = 1'b1; // RAM_data (lower 8 bits of current_instruction) to ALU B
-                ram_addr_mux_sel = 1'b1; // Operand as RAM address for data read
+                alu_b_mux_sel = 1'b1; // Data from RAM (Port B) to ALU B
+                // No need to set ram_addr_mux_sel
             end
             OP_SUB_ACC_IMM: begin
                 acc_load_en = 1'b1;
                 alu_opcode = ALU_OP_SUB;
-                alu_a_mux_sel = 1'b0; // ACC to ALU A
-                alu_b_mux_sel = 1'b0; // Immediate to ALU B
+                alu_b_mux_sel = 1'b0;
             end
             OP_SUB_ACC_MEM: begin
                 acc_load_en = 1'b1;
                 alu_opcode = ALU_OP_SUB;
-                alu_a_mux_sel = 1'b0; // ACC to ALU A
-                alu_b_mux_sel = 1'b1; // RAM_data (lower 8 bits of current_instruction) to ALU B
-                ram_addr_mux_sel = 1'b1; // Operand as RAM address for data read
+                alu_b_mux_sel = 1'b1;
+                // No need to set ram_addr_mux_sel
             end
             OP_AND_ACC_IMM: begin
                 acc_load_en = 1'b1;
                 alu_opcode = ALU_OP_AND;
-                alu_a_mux_sel = 1'b0; // ACC to ALU A
-                alu_b_mux_sel = 1'b0; // Immediate to ALU B
+                alu_b_mux_sel = 1'b0;
             end
             OP_AND_ACC_MEM: begin
                 acc_load_en = 1'b1;
                 alu_opcode = ALU_OP_AND;
-                alu_a_mux_sel = 1'b0; // ACC to ALU A
-                alu_b_mux_sel = 1'b1; // RAM_data (lower 8 bits of current_instruction) to ALU B
-                ram_addr_mux_sel = 1'b1; // Operand as RAM address for data read
+                alu_b_mux_sel = 1'b1;
+                // No need to set ram_addr_mux_sel
             end
 
             OP_INC_ACC: begin
                 acc_load_en = 1'b1;
                 alu_opcode = ALU_OP_INC;
-                alu_a_mux_sel = 1'b0; // ACC to ALU A (B is implicitly 1 for INC)
-                alu_b_mux_sel = 1'b0; // Doesn't matter for INC, but set to default
+                alu_b_mux_sel = 1'b0;
             end
 
             OP_JUMP: begin
-                pc_load_en = 1'b1; // Load PC with jump_addr
+                pc_load_en = 1'b1;
             end
 
             OP_OUT_ACC_SERIAL: begin
-                serial_out_en = 1'b1; // Enable serial output logic
+                serial_out_en = 1'b1;
             end
 
             default: begin
@@ -157,10 +145,9 @@ module ir_decoder (
     // Instruction Register Update (sequential logic)
     always @(posedge clk or negedge reset_n) begin
         if (!reset_n) begin
-            ir_reg <= 16'h0000; // Reset IR
+            ir_reg <= 16'h0000;
         end else begin
-            // IR is loaded with the instruction fetched from RAM (instruction_in)
-            // This happens every clock cycle in a single-cycle CPU
+            // IR is loaded with the instruction fetched from RAM (instruction_in from Port A)
             ir_reg <= instruction_in;
         end
     end
