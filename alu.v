@@ -17,11 +17,11 @@ module alu (
     parameter OP_INC = 4'b0011;
 
     always @(*) begin
-        // 預設值 for all 'reg' variables in this always block
+        
         result = 8'h00;
         carry_out = 1'b0;
-        sum_extended = 9'h000; // <--- 修正: 預設值
-        sub_extended = 9'h000; // <--- 修正: 預設值
+        sum_extended = 9'h000; 
+        sub_extended = 9'h000; 
 
         case (opcode)
             OP_ADD: begin
@@ -36,7 +36,7 @@ module alu (
             end
             OP_AND: begin
                 result = a & b;
-                // carry_out 已經有預設值，無需在此重複設置為 0
+                
             end
             OP_INC: begin
                 sum_extended = {1'b0, a} + {1'b0, 8'h01};
@@ -44,7 +44,7 @@ module alu (
                 carry_out = sum_extended[8];
             end
             default: begin
-                // 預設值已經在 always 塊開頭設定，無需在此重複
+                
             end
         endcase
     end

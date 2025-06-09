@@ -8,7 +8,6 @@ module program_counter (
     output reg [7:0] pc_out // Current Program Counter value
 );
 
-    // Initial PC value on reset
     initial begin
         pc_out = 8'h00; // Start execution from address 0x00
     end
